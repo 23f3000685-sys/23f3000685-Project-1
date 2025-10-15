@@ -6,9 +6,9 @@ This project hosts an API endpoint that receives a JSON payload and automaticall
 ## Setup
 1.   Clone repo
 2.   Run `npm install`
-3.   Create `.env` with:
-       FORM_SECRET=your_google_form_secret
-       GH_TOKEN=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
+3.   Create `.env` with: 
+   a.       RM_SECRET=your_google_form_secret
+   b.       GH_TOKEN=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
 4.   Run with `node server.js`
 
 ## Usage
