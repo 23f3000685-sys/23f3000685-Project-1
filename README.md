@@ -6,7 +6,7 @@ This project hosts an API endpoint that receives a JSON payload and automaticall
 ## Setup
 1.   Clone repo
 2.   Run `npm install`
-3.   Create `.env` with ## FORM_SECRET = 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
+3.   Create `.env` with ** FORM_SECRET = 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 **
 4.   Run with `node server.js`
 
 ## Usage
