@@ -17,5 +17,7 @@ https://<username>.github.io/captcha-solver-123/?url=logo.png
 
 ## Code Explanation
 index.html — HTML structure and image container.
+
 script.js — Reads ?url=, displays image, simulates solving.
+
 style.css — Simple styling for container, image, and solution.
