@@ -7,7 +7,7 @@ Displays a captcha image (from `?url=` query) and shows the solved text.
 ## Setup
 1. Clone the repo:
 ```bash
-git clone https://github.com/<username>/captcha-solver-123.git
+git clone https://23f3000685-sys.github.io/23f3000685-Project-1/
 ```
 2. No server required — static HTML works directly on GitHub Pages.
 
