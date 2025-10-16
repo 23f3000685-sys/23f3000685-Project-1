@@ -1,30 +1,21 @@
-# Auto App Task Runner
+# Captcha Solver
+This is a minimal captcha solver demo hosted on GitHub Pages.
 
 ## Summary
-This project hosts an API endpoint that receives a JSON payload and automatically generates, commits, and deploys a minimal app to GitHub Pages.
+Displays a captcha image (from `?url=` query) and shows the solved text.
 
 ## Setup
-1. Clone repo
-2. Run `npm install`
-3. Create `.env` with: secret = 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
-4. Run with `node server.js`
+1. Clone the repo:
+```bash
+git clone https://github.com/<username>/captcha-solver-123.git
+```
+2. No server required — static HTML works directly on GitHub Pages.
 
 ## Usage
-```bash
-curl https://your-server/api-endpoint \
--H "Content-Type: application/json" \
--d '{"brief": "sample app", "task": "captcha-solver", "round": 1, "nonce": "abc123", "secret": "your_google_form_secret"}'
-```
+Open in browser:
+https://<username>.github.io/captcha-solver-123/?url=logo.png
 
-## Enable GitHub Pages
-1. Go to **Settings → Pages**
-2. Under **Branch**, select `main`  
-3. Save — you’ll get a Pages URL:  
-   `https://23f3000685-sys.github.io/23f3000685-Project-1/`
-
-## Test
-Use your `curl` again and confirm:
-- ✅ HTTP 200 JSON response
-- ✅ Repo visible
-- ✅ GitHub Pages loads (200 OK)
-- ✅ Callback POSTed successfully
+## Code Explanation
+index.html — HTML structure and image container.
+script.js — Reads ?url=, displays image, simulates solving.
+style.css — Simple styling for container, image, and solution.
