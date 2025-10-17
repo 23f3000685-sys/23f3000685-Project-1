@@ -7,14 +7,17 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout the repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set remote URL to use PAT
+      # Step 2: Set remote URL with PAT
+      - name: Use PAT for git push
         run: git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
         env:
           PAT: ${{ secrets.PAT }}
 
+      # Step 3: Commit initial files
       - name: Commit initial files
         run: |
           git config user.name "github-actions"
@@ -22,22 +25,27 @@ jobs:
           git add .
           git commit -m "Round 1: initial deploy" || echo "No changes"
 
+      # Step 4: Add round.json
       - name: Add round.json
         run: |
           echo '{ "round": 1 }' > round.json
           git add round.json
           git commit -m "Add round.json for round 1" || echo "No changes"
 
+      # Step 5: Push changes using PAT
       - name: Push changes
         run: git push origin main
 
+      # Step 6: Wait for Pages deployment
       - name: Wait for Pages deployment
         run: sleep 60
 
-      - name: Get latest commit SHA
+      # Step 7: Get latest commit SHA
+      - name: Get commit SHA
         id: sha
         run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
 
+      # Step 8: Notify evaluator
       - name: Notify evaluator
         env:
           EVALUATION_URL: ${{ secrets.EVALUATION_URL }}
