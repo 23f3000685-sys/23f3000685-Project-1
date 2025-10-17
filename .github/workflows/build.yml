@@ -40,7 +40,7 @@ jobs:
       - name: Wait for Pages deployment
         run: sleep 60
 
-      # Step 7: Notify evaluator with dynamic JSON
+      # Step 7: Notify evaluator
       - name: Notify evaluator
         env:
           EVALUATION_URL: ${{ secrets.EVALUATION_URL }}
@@ -51,13 +51,11 @@ jobs:
           COMMIT_SHA=$(git rev-parse HEAD)
           PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY}/"
 
-          echo "Posting to evaluator with:"
           echo "Commit SHA: $COMMIT_SHA"
           echo "Pages URL: $PAGES_URL"
 
-          curl -v -X POST "$EVALUATION_URL" \
-            -H "Content-Type: application/json" \
-            -d @- <<EOF
+          # Write dynamic JSON payload to a file
+          cat > payload.json <<JSON
 {
   "email": "$EMAIL",
   "task": "$TASK",
@@ -67,4 +65,9 @@ jobs:
   "commit_sha": "$COMMIT_SHA",
   "pages_url": "$PAGES_URL"
 }
-EOF
+JSON
+
+          # POST the JSON file
+          curl -v -X POST "$EVALUATION_URL" \
+            -H "Content-Type: application/json" \
+            -d @payload.json
