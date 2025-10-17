@@ -7,18 +7,18 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the repo
+      # Step 1: Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Step 2: Set remote URL with PAT
+      # Step 2: Set remote URL to use PAT
       - name: Use PAT for git push
         run: git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
         env:
           PAT: ${{ secrets.PAT }}
 
       # Step 3: Commit initial files
-      - name: Commit initial files
+      - name: Commit files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -32,7 +32,7 @@ jobs:
           git add round.json
           git commit -m "Add round.json for round 1" || echo "No changes"
 
-      # Step 5: Push changes using PAT
+      # Step 5: Push using PAT
       - name: Push changes
         run: git push origin main
 
