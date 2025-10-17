@@ -1,16 +1,55 @@
-name: Auto Builder
+name: Deploy Captcha Solver
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: pip install fastapi uvicorn requests
-      - run: python main.py
+
+      - name: Commit static site
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Deploy captcha solver" || echo "No changes to commit"
+
+      - name: Push to GitHub
+        run: git push origin main
+
+      - name: Enable GitHub Pages
+        run: |
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/pages \
+            -d '{"source":{"branch":"main","path":"/"}}'
+
+      - name: Wait for Pages deployment
+        run: sleep 60
+
+      - name: Get latest commit SHA
+        id: sha
+        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
+
+      - name: Notify evaluator
+        env:
+          EVALUATION_URL: ${{ secrets.EVALUATION_URL }}
+          EMAIL: ${{ secrets.EMAIL }}
+          TASK: ${{ secrets.TASK }}
+          ROUND: ${{ secrets.ROUND }}
+          NONCE: ${{ secrets.NONCE }}
+        run: |
+          curl -X POST $EVALUATION_URL \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"email\": \"$EMAIL\",
+              \"task\": \"$TASK\",
+              \"round\": $ROUND,
+              \"nonce\": \"$NONCE\",
+              \"repo_url\": \"https://github.com/${{ github.repository }}\",
+              \"commit_sha\": \"${{ steps.sha.outputs.commit_sha }}\",
+              \"pages_url\": \"https://${{ github.repository_owner }}.github.io/${{ github.repository }}/\"
+            }"
