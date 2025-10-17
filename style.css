@@ -1,7 +1,6 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
-  color: #333;
   text-align: center;
   padding: 50px;
 }
@@ -17,7 +16,6 @@ body {
 img {
   margin: 20px 0;
   max-width: 150px;
-  height: auto;
 }
 
 #solution {
