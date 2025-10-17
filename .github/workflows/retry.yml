@@ -1,4 +1,4 @@
-name: Round 2 Update
+name: Round 2
 
 on:
   repository_dispatch:
@@ -8,8 +8,17 @@ jobs:
   update-repo:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Step 1: Checkout repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
+      # Step 2: Set remote URL to use PAT
+      - name: Use PAT for git push
+        run: git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
+        env:
+          PAT: ${{ secrets.PAT }}
+
+      # Step 3: Verify student secret
       - name: Verify Secret
         run: |
           SECRET="${{ github.event.client_payload.secret }}"
@@ -18,15 +27,17 @@ jobs:
             exit 1
           fi
 
-      - name: Get brief
+      # Step 4: Get brief & round
+      - name: Get brief & round
         run: |
           BRIEF="${{ github.event.client_payload.brief }}"
           ROUND="${{ github.event.client_payload.round }}"
           echo "Round: $ROUND, Brief: $BRIEF"
 
-      - name: Modify repo based on brief
+      # Step 5: Modify repo based on brief
+      - name: Update code and README
         run: |
-          # Example: handle SVG images in JS
+          # Example: handle SVG images
           if [[ "$BRIEF" == *"SVG"* ]]; then
             sed -i 's/\.png/\.png|.svg/g' script.js
             echo "Updated script.js to support SVG images"
@@ -36,21 +47,25 @@ jobs:
           echo "## Updates for round $ROUND" >> README.md
           echo "$BRIEF" >> README.md
 
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add .
+          # Update round.json
+          echo "{ \"round\": $ROUND }" > round.json
+          git add round.json README.md script.js
           git commit -m "Round $ROUND updates: $BRIEF" || echo "No changes"
-          git push origin main
 
+      # Step 6: Push changes
+      - name: Push changes
+        run: git push origin main
+
+      # Step 7: Wait for Pages deployment
       - name: Wait for Pages deployment
         run: sleep 60
 
+      # Step 8: Get commit SHA
       - name: Get commit SHA
         id: sha
         run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
 
+      # Step 9: Notify evaluator
       - name: Notify evaluator
         env:
           EVALUATION_URL: ${{ secrets.EVALUATION_URL }}
