@@ -7,10 +7,10 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      # Set remote URL to use PAT
-      - name: Set remote URL with PAT
+      - name: Set remote URL to use PAT
         run: git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
         env:
           PAT: ${{ secrets.PAT }}
