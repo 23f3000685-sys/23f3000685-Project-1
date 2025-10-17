@@ -21,38 +21,53 @@
 <body>
   <div class="container">
     <h1>Evaluator JSON Preview</h1>
-    <pre id="jsonOutput"></pre>
+    <pre id="jsonOutput">Loading...</pre>
   </div>
 
   <script>
-    // Extract repository and username from current URL
-    const hostParts = window.location.host.split('.');
-    const username = hostParts[0];
-    const pathParts = window.location.pathname.split('/');
-    const repoPath = pathParts[1] || "captcha-solver-23f3000685";
-    const pagesURL = `https://${username}.github.io/${repoPath}/`;
+    async function loadJSONPreview() {
+      // Extract repo info from URL
+      const hostParts = window.location.host.split('.');
+      const username = hostParts[0];
+      const pathParts = window.location.pathname.split('/');
+      const repoPath = pathParts[1] || "captcha-solver-23f3000685";
+      const pagesURL = `https://${username}.github.io/${repoPath}/`;
 
-    // Generate a pseudo dynamic commit SHA (first 7 chars of timestamp hash)
-    const commitSHA = Date.now().toString(16).slice(-7);
+      // Dynamic commit SHA (pseudo)
+      const commitSHA = Date.now().toString(16).slice(-7);
 
-    // Generate a pseudo nonce if none is provided
-    const defaultNonce = 'nonce-' + Math.random().toString(36).slice(2, 10);
+      // Dynamic nonce
+      const defaultNonce = 'nonce-' + Math.random().toString(36).slice(2, 10);
 
-    // Read query parameters
-    const params = new URLSearchParams(window.location.search);
+      // Fetch round from round.json if exists
+      let round = 1;
+      try {
+        const res = await fetch('round.json');
+        if (res.ok) {
+          const roundData = await res.json();
+          round = roundData.round || 1;
+        }
+      } catch (e) {
+        console.warn("round.json not found, defaulting to round 1");
+      }
 
-    const payload = {
-      email: params.get("email") || "23f3000685@ds.study.iitm.ac.in",
-      task: params.get("task") || repoPath,
-      round: parseInt(params.get("round")) || 1,
-      nonce: params.get("nonce") || defaultNonce,
-      repo_url: params.get("repo_url") || `https://github.com/${username}/${repoPath}`,
-      commit_sha: params.get("commit_sha") || commitSHA,
-      pages_url: params.get("pages_url") || pagesURL
-    };
+      // Query params override
+      const params = new URLSearchParams(window.location.search);
 
-    // Display JSON
-    document.getElementById("jsonOutput").textContent = JSON.stringify(payload, null, 2);
+      const payload = {
+        email: params.get("email") || "23f3000685@ds.study.iitm.ac.in",
+        task: params.get("task") || repoPath,
+        round: parseInt(params.get("round")) || round,
+        nonce: params.get("nonce") || defaultNonce,
+        repo_url: params.get("repo_url") || `https://github.com/${username}/${repoPath}`,
+        commit_sha: params.get("commit_sha") || commitSHA,
+        pages_url: params.get("pages_url") || pagesURL
+      };
+
+      document.getElementById("jsonOutput").textContent = JSON.stringify(payload, null, 2);
+    }
+
+    loadJSONPreview();
   </script>
 </body>
 </html>
