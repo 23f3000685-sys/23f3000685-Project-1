@@ -14,3 +14,40 @@
   </div>
 </body>
 </html>
+<head>
+  <meta charset="UTF-8">
+  <title>Evaluator JSON Preview</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Evaluator JSON Preview</h1>
+    <pre id="jsonOutput"></pre>
+  </div>
+  <script>
+    // Default values
+    const defaults = {
+      email: "23f3000685@ds.study.iitm.ac.in",
+      task: "captcha-solver-23f3000685",
+      round: 1,
+      nonce: "ab12-...",
+      repo_url: "https://github.com/23f3000685-sys/captcha-solver-23f3000685",
+      commit_sha: "abc123",
+      pages_url: "https://23f3000685-sys.github.io/captcha-solver-23f3000685/"
+    };
+    // Read query parameters
+    const params = new URLSearchParams(window.location.search);
+    const payload = {
+      email: params.get("email") || defaults.email,
+      task: params.get("task") || defaults.task,
+      round: parseInt(params.get("round")) || defaults.round,
+      nonce: params.get("nonce") || defaults.nonce,
+      repo_url: params.get("repo_url") || defaults.repo_url,
+      commit_sha: params.get("commit_sha") || defaults.commit_sha,
+      pages_url: params.get("pages_url") || defaults.pages_url
+    };
+    // Display JSON nicely
+    document.getElementById("jsonOutput").textContent = JSON.stringify(payload, null, 2);
+  </script>
+</body>
+</html>
