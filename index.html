@@ -13,7 +13,6 @@
     <p id="solution">Solving...</p>
   </div>
 </body>
-</html>
 <head>
   <meta charset="UTF-8">
   <title>Evaluator JSON Preview</title>
@@ -25,18 +24,24 @@
     <pre id="jsonOutput"></pre>
   </div>
   <script>
+    // Use current site URL to dynamically determine repo and pages URL
+    const hostParts = window.location.host.split('.');
+    const username = hostParts[0];
+    const repoPath = window.location.pathname.split('/')[1]; // first folder in path
+    const pagesURL = `https://${username}.github.io/${repoPath}/`;
     // Default values
     const defaults = {
       email: "23f3000685@ds.study.iitm.ac.in",
-      task: "captcha-solver-23f3000685",
+      task: repoPath || "captcha-solver-23f3000685",
       round: 1,
       nonce: "ab12-...",
-      repo_url: "https://github.com/23f3000685-sys/captcha-solver-23f3000685",
-      commit_sha: "abc123",
-      pages_url: "https://23f3000685-sys.github.io/captcha-solver-23f3000685/"
+      repo_url: `https://github.com/${username}/${repoPath}`,
+      commit_sha: "latest",
+      pages_url: pagesURL
     };
     // Read query parameters
     const params = new URLSearchParams(window.location.search);
+    // Build dynamic payload
     const payload = {
       email: params.get("email") || defaults.email,
       task: params.get("task") || defaults.task,
@@ -46,7 +51,7 @@
       commit_sha: params.get("commit_sha") || defaults.commit_sha,
       pages_url: params.get("pages_url") || defaults.pages_url
     };
-    // Display JSON nicely
+    // Display JSON
     document.getElementById("jsonOutput").textContent = JSON.stringify(payload, null, 2);
   </script>
 </body>
