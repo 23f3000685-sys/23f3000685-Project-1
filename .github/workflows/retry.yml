@@ -1,0 +1,72 @@
+name: Round 2 Update
+
+on:
+  repository_dispatch:
+    types: [round2-update]
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Secret
+        run: |
+          SECRET="${{ github.event.client_payload.secret }}"
+          if [ "$SECRET" != "${{ secrets.STUDENT_SECRET }}" ]; then
+            echo "Invalid secret!"
+            exit 1
+          fi
+
+      - name: Get brief
+        run: |
+          BRIEF="${{ github.event.client_payload.brief }}"
+          ROUND="${{ github.event.client_payload.round }}"
+          echo "Round: $ROUND, Brief: $BRIEF"
+
+      - name: Modify repo based on brief
+        run: |
+          # Example: handle SVG images in JS
+          if [[ "$BRIEF" == *"SVG"* ]]; then
+            sed -i 's/\.png/\.png|.svg/g' script.js
+            echo "Updated script.js to support SVG images"
+          fi
+
+          # Update README.md
+          echo "## Updates for round $ROUND" >> README.md
+          echo "$BRIEF" >> README.md
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Round $ROUND updates: $BRIEF" || echo "No changes"
+          git push origin main
+
+      - name: Wait for Pages deployment
+        run: sleep 60
+
+      - name: Get commit SHA
+        id: sha
+        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
+
+      - name: Notify evaluator
+        env:
+          EVALUATION_URL: ${{ secrets.EVALUATION_URL }}
+          EMAIL: ${{ secrets.EMAIL }}
+          TASK: ${{ secrets.TASK }}
+          ROUND: ${{ github.event.client_payload.round }}
+          NONCE: ${{ secrets.NONCE }}
+        run: |
+          curl -X POST $EVALUATION_URL \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"email\": \"$EMAIL\",
+              \"task\": \"$TASK\",
+              \"round\": $ROUND,
+              \"nonce\": \"$NONCE\",
+              \"repo_url\": \"https://github.com/${{ github.repository }}\",
+              \"commit_sha\": \"${{ steps.sha.outputs.commit_sha }}\",
+              \"pages_url\": \"https://${{ github.repository_owner }}.github.io/${{ github.repository }}/\"
+            }"
