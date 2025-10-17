@@ -7,12 +7,12 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout repo
+      # Step 1: Checkout
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Step 2: Set remote URL to use PAT
-      - name: Use PAT for git push
+      # Step 2: Use PAT for git push
+      - name: Set remote URL with PAT
         run: git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
         env:
           PAT: ${{ secrets.PAT }}
@@ -40,12 +40,7 @@ jobs:
       - name: Wait for Pages deployment
         run: sleep 60
 
-      # Step 7: Get latest commit SHA
-      - name: Get commit SHA
-        id: sha
-        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
-
-      # Step 8: Notify evaluator
+      # Step 7: Notify evaluator with dynamic JSON
       - name: Notify evaluator
         env:
           EVALUATION_URL: ${{ secrets.EVALUATION_URL }}
@@ -53,14 +48,23 @@ jobs:
           TASK: ${{ secrets.TASK }}
           NONCE: ${{ secrets.NONCE }}
         run: |
-          curl -X POST $EVALUATION_URL \
+          COMMIT_SHA=$(git rev-parse HEAD)
+          PAGES_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY}/"
+
+          echo "Posting to evaluator with:"
+          echo "Commit SHA: $COMMIT_SHA"
+          echo "Pages URL: $PAGES_URL"
+
+          curl -v -X POST "$EVALUATION_URL" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"email\": \"$EMAIL\",
-              \"task\": \"$TASK\",
-              \"round\": 1,
-              \"nonce\": \"$NONCE\",
-              \"repo_url\": \"https://github.com/${{ github.repository }}\",
-              \"commit_sha\": \"${{ steps.sha.outputs.commit_sha }}\",
-              \"pages_url\": \"https://${{ github.repository_owner }}.github.io/${{ github.repository }}/\"
-            }"
+            -d @- <<EOF
+{
+  "email": "$EMAIL",
+  "task": "$TASK",
+  "round": 1,
+  "nonce": "$NONCE",
+  "repo_url": "https://github.com/${GITHUB_REPOSITORY}",
+  "commit_sha": "$COMMIT_SHA",
+  "pages_url": "$PAGES_URL"
+}
+EOF
